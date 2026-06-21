@@ -29,7 +29,7 @@ El proyecto se dividió en dos fases principales:
 ### 2.1 Unidad de Control (FSM)
 La máquina de estados desarrollada gestiona la secuencia de inicialización (configuración de modo 4 bits, encendido de display, clear, etc.) y la posterior escritura de datos. 
 
-![Simulación Inicialización](Imagenes/diagrama1.png)
+![Simulación Inicialización](Imagenes/diagrama.png)
 
 ### 2.2 Arquitectura Completa del Sistema
 El siguiente diagrama de bloques representa la organización del módulo *top*, mostrando la interconexión entre la unidad de control, los registros de datos, el divisor de frecuencia (para el reloj del *Enable* de la LCD) y el multiplexor que conmuta entre comandos y datos.
