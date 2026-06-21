@@ -47,21 +47,9 @@ El proyecto se dividió en dos fases:
 ### 2.1 Unidad de Control (FSM)
 
 La FSM gestiona la inicialización del controlador y la escritura secuencial de cada carácter. El siguiente diagrama resume la versión dinámica (`lcd_parte2`), agrupando los 40 estados individuales del código en bloques funcionales:
+![Simulación Inicialización](Imagenes/diagrama.png)
 
-```mermaid
-stateDiagram-v2
-    [*] --> INIT
-    INIT --> FILA1_TXT : 8 comandos de inicializacion (Function Set 8 bits, Display ON, Clear, Entry Mode)
-    FILA1_TXT --> FILA1_DIG : Escribe texto fijo "Temp A: " (8 caracteres)
-    FILA1_DIG --> FILA1_ETQ : Escribe decenas y unidades de entrada_a
-    FILA1_ETQ --> CAMBIO_FILA2 : Escribe etiqueta BAJO / MEDI / ALTO
-    CAMBIO_FILA2 --> FILA2_TXT : Comando 0xC0 (direccion DDRAM fila 2)
-    FILA2_TXT --> FILA2_DIG : Escribe texto fijo "Temp B: " (8 caracteres)
-    FILA2_DIG --> FILA2_ETQ : Escribe decenas y unidades de entrada_b
-    FILA2_ETQ --> FILA1_TXT : Comando 0x80 (DDRAM fila 1, refresco continuo)
-```
 
-En la fase estática (módulo `LCD`) la estructura es idéntica hasta el final de la fila 2, pero en lugar de regresar a `FILA1_TXT` la FSM cae en un estado `default` que mantiene `busy = 0` indefinidamente, dejando el mensaje fijo en pantalla.
 
 ### 2.2 Arquitectura completa del sistema
 
@@ -85,24 +73,20 @@ El bloque combinacional (`always @(*)`) calcula, para cada entrada, las cifras d
 
 ## 3. Simulaciones
 
-Para validar el comportamiento temporal y lógico de la FSM antes de programar la FPGA, se ejecutó el *testbench* sobre los módulos `LCD` y `lcd_parte2` en ModelSim/Questa.
+Antes de programar la tarjeta, se verificó el funcionamiento del módulo lcd_parte2 mediante simulación en Verilog. El objetivo de esta verificación fue confirmar dos aspectos del diseño de manera independiente al hardware físico: la lógica combinacional que clasifica cada valor de entrada en los rangos BAJO (0–4), MEDI (5–10) y ALTO (11–15), y el protocolo de comunicación hacia la pantalla LCD a través de las señales rs, en, rw y dat.
 
-### 3.1 Inicialización de la LCD
+La simulación se realizó con Icarus Verilog (iverilog para compilar, vvp para ejecutar) y los resultados se visualizaron con GTKWave a partir del archivo de formas de onda (.vcd) generado durante la ejecución.
 
-* ![Simulación Inicialización](ruta_a_tu_imagen_sim_init.png)
-* **Análisis:** durante los estados `0` a `7`, `RS` permanece en `0` (modo comando) mientras se envían los comandos de configuración (`0x30 ×3`, `0x38`, `0x08`, `0x01`, `0x06`, `0x0C`). Cada comando se mantiene estable en `dat` durante el tiempo de espera definido por `wait_time` (`DELAY_40MS`, `DELAY_5MS`, `DELAY_100US` o `DELAY_2MS` según el estado) antes de que `en_cnt` cuente hasta `EN_HIGH_T` (1250 ciclos × 20 ns = 25 µs) y se genere el pulso en `E` que la LCD usa para capturar el dato.
+### Testbench
 
-### 3.2 Transmisión de datos (estáticos y dinámicos)
+Se diseñó un testbench (tb_lcd_parte2:[código test bench](codigos/tb_lcd_parte2.v)) que instancia el módulo lcd_parte2, genera un reloj de 50 MHz equivalente al de la tarjeta (periodo de 20 ns) y aplica de forma secuencial los 16 valores posibles de entrada (0 a 15) a entrada_a y entrada_b simultáneamente, replicando los mismos 16 estados documentados en la sección de evidencias fotográficas. Para cada valor, el testbench espera a que la máquina de estados de la LCD complete un refresco completo de ambas filas antes de pasar al siguiente valor, y compara automáticamente la etiqueta de rango obtenida (BAJO/MEDI/ALTO) contra el valor esperado, reportando el resultado por consola.
 
-* ![Simulación Escritura](ruta_a_tu_imagen_sim_data.png)
-* **Análisis:** al entrar en los estados de escritura de caracteres, `RS` cambia a `1`. En la fase dinámica se verifica que `a_dec_ascii`/`a_uni_ascii` (y su equivalente para el canal B) contengan el valor decimal de `entrada_a`/`entrada_b` correctamente codificado en ASCII (sumando `0x30`), y que la etiqueta `a_r0..a_r3` cambie entre `BAJO`, `MEDI` y `ALTO` según el valor de la entrada en el instante de la captura.
-* **Periodo de refresco:** sumando los `~32` estados de la rama de escritura (estados `8` a `39`) con `DELAY_2MS` cada uno, el ciclo completo de refresco dura aproximadamente `64 ms`. Esto explica por qué, aunque la FSM nunca se detiene, el cambio de los switches se ve reflejado en pantalla casi de inmediato para un observador humano.
+Dado que los tiempos reales de escritura hacia la LCD están en el orden de milisegundos (la inicialización sola toma 40 ms, y cada carácter requiere 2 ms adicionales), una simulación con los tiempos originales del módulo implica recorrer decenas de millones de ciclos de reloj, lo cual resulta poco práctico para verificación rápida. Por esta razón se generó una segunda versión del módulo (LCD_parte2_sim.v) idéntica en toda su lógica, pero con los parámetros de tiempo (DELAY_40MS, DELAY_5MS, DELAY_100US, DELAY_2MS, EN_HIGH_T) reducidos únicamente para fines de simulación. Esta versión no se utilizó en ningún momento para la síntesis en la FPGA; el archivo programado en la tarjeta corresponde siempre al módulo original con los tiempos reales.
 
-> **Nota:** reemplaza las rutas de imagen anteriores por tus capturas reales de ModelSim (formas de onda de `clk`, `rs`, `en`, `dat` y `state`).
+![test bench cap pantalla](Imagenes/tb.png)
 
----
+Para los 16 valores evaluados, la etiqueta de clasificación generada por el módulo coincidió en todos los casos con el valor esperado, tanto en el canal A como en el canal B, sin registrarse ningún resultado fallido en la consola de simulación. Esto valida que la lógica combinacional de clasificación BAJO/MEDI/ALTO funciona correctamente para todo el rango de valores representable con las 4 entradas de cada canal (DIP switches).
 
----
 
 ## 4. Implementación
 
@@ -155,3 +139,4 @@ Se verifica que para los 16 valores posibles de cada entrada (0–15) la etiquet
 * Intel/Altera. *Cyclone IV Device Handbook* — documentación de la FPGA utilizada para la implementación.
 * Intel. *Quartus Prime Pin Planner User Guide* — referencia para la asignación de pines y configuración de pines de propósito dual.
 * IEEE Std 1364. *IEEE Standard for Verilog Hardware Description Language*.
+*
