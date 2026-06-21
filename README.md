@@ -66,9 +66,22 @@ Para garantizar el correcto funcionamiento del bit de datos conectado al **pin 1
 ### 4.2 Evidencia del Funcionamiento en Hardware
 A continuación se muestran los resultados finales en la tarjeta de desarrollo:
 
+#### 4.2.1 Mosaico de los estados de la implementación en hardware
+Las imágenes están ordenadas del estado `0` al `15` y muestran las capturas tomadas durante la implementación en la FPGA.
+
+| Estado 0 | Estado 1 | Estado 2 | Estado 3 |
+|---|---|---|---|
+| ![Estado 0](Imagenes/tabla%20evidencias/0.jpg) <br>Estado 0 | ![Estado 1](Imagenes/tabla%20evidencias/1.jpg) <br>Estado 1 | ![Estado 2](Imagenes/tabla%20evidencias/2.jpg) <br>Estado 2 | ![Estado 3](Imagenes/tabla%20evidencias/3.jpg) <br>Estado 3 |
+| Estado 4 | Estado 5 | Estado 6 | Estado 7 |
+| ![Estado 4](Imagenes/tabla%20evidencias/4.jpg) <br>Estado 4 | ![Estado 5](Imagenes/tabla%20evidencias/5.jpg) <br>Estado 5 | ![Estado 6](Imagenes/tabla%20evidencias/6.jpg) <br>Estado 6 | ![Estado 7](Imagenes/tabla%20evidencias/7.jpg) <br>Estado 7 |
+| Estado 8 | Estado 9 | Estado 10 | Estado 11 |
+| ![Estado 8](Imagenes/tabla%20evidencias/8.jpg) <br>Estado 8 | ![Estado 9](Imagenes/tabla%20evidencias/9.jpg) <br>Estado 9 | ![Estado 10](Imagenes/tabla%20evidencias/10.jpg) <br>Estado 10 | ![Estado 11](Imagenes/tabla%20evidencias/11.jpg) <br>Estado 11 |
+| Estado 12 | Estado 13 | Estado 14 | Estado 15 |
+| ![Estado 12](Imagenes/tabla%20evidencias/12.jpg) <br>Estado 12 | ![Estado 13](Imagenes/tabla%20evidencias/13.jpeg) <br>Estado 13 | ![Estado 14](Imagenes/tabla%20evidencias/14.jpeg) <br>Estado 14 | ![Estado 15](Imagenes/tabla%20evidencias/15.jpg) <br>Estado 15 |
+
 #### Parte 1: Texto Estático
-* ![Resultado Parte 1](ruta_a_foto_estatico.jpg)
-* *Descripción:* Visualización exitosa del texto base en la fila 1 y fila 2.
+  ![Resultado Parte 1](Imagenes/5enlab.jpeg)
+  *Descripción:* Visualización exitosa del texto base en la fila 1 y fila 2.
 
 #### Parte 2: Texto Dinámico con Entradas de 8 bits
 * ![Resultado Parte 2](ruta_a_foto_dinamico.jpg)
