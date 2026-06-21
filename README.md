@@ -10,10 +10,13 @@
 Indice:
 
 1. [Diseño implementado](#diseño-implementado)
-2. [Simulaciones](#simulaciones)
-3. [Implementación](#implementación)
-4. [Conclusiones](#conclusiones)
-5. [Referencias](#referencias)
+2. [Diagramas](#diagramas)
+    - [Unidad de Control (FSM)](#unidad-de-control-fsm)
+    - [Arquitectura completa del sistema](#arquitectura-completa-del-sistema)
+3. [Simulaciones](#simulaciones)
+4. [Implementación](#implementación)
+5. [Conclusiones](#conclusiones)
+6. [Referencias](#referencias)
 
 Este laboratorio consistió en el diseño, simulación e implementación en hardware de un sistema de visualización alfanumérica sobre una pantalla LCD 16x2 (controlador HD44780), controlada mediante una Máquina de Estados Finitos (FSM) descrita en Verilog sobre una FPGA Intel/Altera Cyclone IV.
 
@@ -83,7 +86,9 @@ Se diseñó un testbench (tb_lcd_parte2:[código test bench](codigos/tb_lcd_part
 
 Dado que los tiempos reales de escritura hacia la LCD están en el orden de milisegundos (la inicialización sola toma 40 ms, y cada carácter requiere 2 ms adicionales), una simulación con los tiempos originales del módulo implica recorrer decenas de millones de ciclos de reloj, lo cual resulta poco práctico para verificación rápida. Por esta razón se generó una segunda versión del módulo (LCD_parte2_sim.v) idéntica en toda su lógica, pero con los parámetros de tiempo (DELAY_40MS, DELAY_5MS, DELAY_100US, DELAY_2MS, EN_HIGH_T) reducidos únicamente para fines de simulación. Esta versión no se utilizó en ningún momento para la síntesis en la FPGA; el archivo programado en la tarjeta corresponde siempre al módulo original con los tiempos reales.
 
-![test bench cap pantalla](Imagenes/tb.png)
+![Captura del testbench](Imagenes/tb.png)
+
+*Descripción:* Captura del banco de pruebas (`tb_lcd_parte2`) mostrando las señales principales (`rs`, `en`, `rw`, `dat`) durante la secuencia de inicialización y la escritura de caracteres. La imagen evidencia cómo se recorren los estados de prueba 0–15 y permite verificar visualmente el envío de comandos y datos hacia la LCD.
 
 Para los 16 valores evaluados, la etiqueta de clasificación generada por el módulo coincidió en todos los casos con el valor esperado, tanto en el canal A como en el canal B, sin registrarse ningún resultado fallido en la consola de simulación. Esto valida que la lógica combinacional de clasificación BAJO/MEDI/ALTO funciona correctamente para todo el rango de valores representable con las 4 entradas de cada canal (DIP switches).
 
